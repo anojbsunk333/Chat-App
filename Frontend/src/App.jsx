@@ -1,41 +1,40 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import SignUpPage from './pages/SignUpPage';
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import SettingsPage from './pages/SettingsPage';
-import ProfilePage from './pages/ProfilePage';
-import { axiosInstance } from './lib/axios';
-import { useAuthStore } from './store/useAuthStore';
+import Navbar from "./components/Navbar";
 
+import HomePage from "./pages/HomePage";
+import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
+import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 
-import { Loader } from 'lucide-react';
-import { Toaster } from 'react-hot-toast';
-import { useThemeStore } from './store/useThemeStore';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
+import { useEffect } from "react";
 
+import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
+  const { theme } = useThemeStore();
 
-   const {authUser,checkAuth,isCheckingAuth} = useAuthStore()
+  console.log({ onlineUsers });
 
-   const {theme} =useThemeStore()
-   useEffect(() => {
-    checkAuth()
-   } ,[checkAuth]);
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
+  console.log({ authUser });
 
-   console.log({ authUser });
-
-   if(isCheckingAuth && !authUser) 
+  if (isCheckingAuth && !authUser)
     return (
-    
-    <div className='flex items-center justify-center h-screen'>
-      <Loader className='size-10 animate-spin'/>
-    </div>
-   )
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
+
   return (
-    <div data-theme="theme">
+    <div data-theme={theme}>
       <Navbar />
 
       <Routes>
@@ -57,9 +56,9 @@ const App = () => {
           element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
         />
       </Routes>
-      <Toaster/>
+
+      <Toaster />
     </div>
   );
-}
-
+};
 export default App;

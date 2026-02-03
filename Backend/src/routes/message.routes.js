@@ -1,11 +1,15 @@
-import express from "express"
-
-
+import express from "express";
+import { protectRoute } from "../middleware/auth.middleware.js";
+import {
+  getUsersForSidebar,
+  getMessages,
+  sendMessage,
+} from "../controllers/message.controller.js";
 
 const router = express.Router();
 
-router.get("")
-
-
+router.get("/users", protectRoute, getUsersForSidebar);
+router.get("/:id", protectRoute, getMessages); // Fixed: comma instead of period
+router.post("/send/:id", protectRoute, sendMessage);
 
 export default router;

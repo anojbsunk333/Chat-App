@@ -1,21 +1,26 @@
-import axios from "axios";
 import { create } from "zustand";
-import { axiosInstance } from "../lib/axios";
+import { axiosInstance } from "../lib/axios.js";
+import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 
-export const useAuthStore = create((set) => ({
+
+const BASE_URL =import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
+
+export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
-  isLoggingIng: false,
+  isLoggingIn: false,
   isUpdatingProfile: false,
-
   isCheckingAuth: true,
-  isCheckingAuth: true,
+  onlineUsers: [],
+  socket: null,
 
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
 
       set({ authUser: res.data });
+      get().connectSocket();
     } catch (error) {
       console.log("Error in checkAuth:", error);
       set({ authUser: null });
@@ -37,6 +42,7 @@ export const useAuthStore = create((set) => ({
       set({ isSigningUp: false });
     }
   },
+
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
@@ -59,9 +65,10 @@ export const useAuthStore = create((set) => ({
       toast.success("Logged out successfully");
       get().disconnectSocket();
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response.data .message);
     }
   },
+
   updateProfile: async (data) => {
     set({ isUpdatingProfile: true });
     try {
@@ -87,7 +94,7 @@ export const useAuthStore = create((set) => ({
     });
     socket.connect();
 
-    set({ socket: socket });
+    set({ socket:socket });
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
