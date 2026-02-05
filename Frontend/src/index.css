@@ -3,3 +3,70 @@
 @plugin "daisyui" {
     themes: "light", "dark", "cupcake", "retro";
 }
+
+/* Time ago styling */
+.time-ago {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-left: 0.5rem;
+}
+
+/* Unread text styling */
+.unread-text {
+  color: #1d4ed8 !important;
+  font-weight: 600 !important;
+}
+
+/* Message preview ellipsis */
+.message-preview {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* Avatar initials fallback */
+.avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: bold;
+}
+/* Notification badge animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.bg-red-500 {
+  animation: pulse 2s infinite;
+}
+
+/* Conversation item hover effects */
+button:hover .bg-red-500 {
+  animation: none;
+  transform: scale(1.1);
+  transition: transform 0.2s;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+}
+/* Add pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

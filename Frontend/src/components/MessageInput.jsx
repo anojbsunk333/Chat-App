@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore"; // Add this import
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -7,7 +8,8 @@ const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
+  const { sendMessage, selectedUser } = useChatStore();
+  const { authUser } = useAuthStore(); // Get authUser
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -32,6 +34,12 @@ const MessageInput = () => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
 
+    // Debug logging
+    console.log("=== SENDING MESSAGE ===");
+    console.log("Auth user ID:", authUser?._id);
+    console.log("Selected user ID:", selectedUser?._id);
+    console.log("Message text:", text);
+
     try {
       await sendMessage({
         text: text.trim(),
@@ -44,6 +52,7 @@ const MessageInput = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
+      toast.error("Failed to send message");
     }
   };
 
