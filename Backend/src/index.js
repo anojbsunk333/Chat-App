@@ -21,9 +21,12 @@ const PORT = process.env.PORT || 3000;
 // CORS - allow both local and production
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://chat-app-three-pi-78.vercel.app", process.env.FRONTEND_URL || ""],
+    origin: [
+      "http://localhost:5173",
+      "https://chat-app-three-pi-78.vercel.app",
+      process.env.FRONTEND_URL || "",
+    ],
     credentials: true,
-    
   }),
 );
 
@@ -77,7 +80,6 @@ if (process.env.NODE_ENV === "production") {
 
 // Alternative: SIMPLER VERSION - Remove the problematic pattern entirely
 // Instead of app.all("/api/*", ...), let Express handle 404 naturally
-
 
 // Export app for Vercel serverless (must be default export)
 export default app;
