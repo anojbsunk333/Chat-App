@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
 const BASE_URL =
-  import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
+  import.meta.env.MODE === "development" ? "http://localhost:5001" : "/api";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -15,7 +15,6 @@ export const useAuthStore = create((set, get) => ({
   onlineUsers: [],
   socket: null,
 
-  // Add this function to manually set online users if needed
   setOnlineUsers: (userIds) => set({ onlineUsers: userIds }),
 
   checkAuth: async () => {
