@@ -29,8 +29,6 @@ export const getMessages = async (req, res) => {
       ],
     }).sort({ createdAt: 1 });
 
-   
-
     res.status(200).json(messages);
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);
@@ -236,5 +234,141 @@ export const getUnreadCount = async (req, res) => {
   } catch (error) {
     console.error("Error in getUnreadCount:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+// DELETE - Delete a specific message
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.user._id;
+
+    // Find and delete message, ensuring user is the sender
+    const message = await Message.findOneAndDelete({
+      _id: messageId,
+      senderId: userId,
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        error: "Message not found or you don't have permission to delete it",
+      });
+    }
+
+    // Notify receiver about message deletion
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageDeleted", {
+        messageId: messageId,
+      });
+    }
+
+    res.status(200).json({ message: "Message deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteMessage:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// DELETE - Delete entire conversation between two users
+export const deleteConversation = async (req, res) => {
+  try {
+    const { userId: otherUserId } = req.params;
+    const currentUserId = req.user._id;
+
+    // Delete all messages between the two users
+    const result = await Message.deleteMany({
+      $or: [
+        { senderId: currentUserId, receiverId: otherUserId },
+        { senderId: otherUserId, receiverId: currentUserId },
+      ],
+    });
+
+    // Notify the other user
+    const otherUserSocketId = getReceiverSocketId(otherUserId);
+    if (otherUserSocketId) {
+      io.to(otherUserSocketId).emit("conversationDeleted", {
+        userId: currentUserId,
+      });
+    }
+
+    res.status(200).json({
+      message: "Conversation deleted successfully",
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Error in deleteConversation:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// PATCH - Update message (edit text)
+export const updateMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { text } = req.body;
+    const userId = req.user._id;
+
+    if (!text) {
+      return res.status(400).json({ message: "Text is required" });
+    }
+
+    const updatedMessage = await Message.findOneAndUpdate(
+      {
+        _id: messageId,
+        senderId: userId,
+      },
+      { text, editedAt: new Date() },
+      { new: true },
+    )
+      .populate("senderId", "fullName profilePic")
+      .populate("receiverId", "fullName profilePic");
+
+    if (!updatedMessage) {
+      return res.status(404).json({
+        error: "Message not found or you don't have permission to edit it",
+      });
+    }
+
+    // Notify receiver about message edit
+    const receiverSocketId = getReceiverSocketId(updatedMessage.receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageEdited", updatedMessage);
+    }
+
+    res.status(200).json(updatedMessage);
+  } catch (error) {
+    console.error("Error in updateMessage:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// PATCH - Bulk update messages status
+export const updateMessagesStatus = async (req, res) => {
+  try {
+    const { messageIds, status } = req.body;
+    const userId = req.user._id;
+
+    if (!messageIds || !Array.isArray(messageIds) || !status) {
+      return res.status(400).json({
+        message: "messageIds array and status are required",
+      });
+    }
+
+    const result = await Message.updateMany(
+      {
+        _id: { $in: messageIds },
+        receiverId: userId,
+      },
+      { read: status === "read" },
+    );
+
+    res.status(200).json({
+      message: "Messages status updated",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("Error in updateMessagesStatus:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

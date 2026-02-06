@@ -27,11 +27,18 @@ app.use(
       process.env.FRONTEND_URL || "",
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Global OPTIONS handler for all routes
+app.options("*", (req, res) => {
+  res.status(200).end();
+});
 
 // API Routes
 app.use("/api/auth", authRoutes);
@@ -45,12 +52,40 @@ app.get("/api/health", (req, res) => {
 // Root endpoint for development
 app.get("/", (req, res) => {
   res.json({
-    message: "Chat App Backend",
+    message: "Chat App Backend - All HTTP Methods Enabled",
     mode: process.env.NODE_ENV || "development",
+    supportedMethods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "HEAD",
+      "OPTIONS",
+    ],
     endpoints: {
-      auth: "/api/auth",
-      messages: "/api/messages",
-      health: "/api/health",
+      auth: {
+        baseUrl: "/api/auth",
+        methods: {
+          POST: ["/signup", "/login", "/logout"],
+          GET: ["/check"],
+          HEAD: ["/check-exists"],
+          PUT: ["/update-profile"],
+          PATCH: ["/update-profile"],
+          DELETE: ["/delete-account"],
+        },
+      },
+      messages: {
+        baseUrl: "/api/messages",
+        methods: {
+          GET: ["/users", "/conversations", "/unread/count", "/:id"],
+          POST: ["/send/:id", "/mark-read/:userId"],
+          PATCH: ["/:messageId (edit)", "/status/bulk"],
+          DELETE: ["/:messageId", "/conversation/:userId"],
+          HEAD: ["/:messageId"],
+        },
+      },
+      health: "/api/health (GET)",
     },
   });
 });

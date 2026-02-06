@@ -118,3 +118,71 @@ export const checkAuth = (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// PATCH - Partial profile update
+export const partialUpdateProfile = async (req, res) => {
+  try {
+    const { fullName, profilePic } = req.body;
+    const userId = req.user._id;
+
+    const updateData = {};
+    if (fullName) updateData.fullName = fullName;
+    if (profilePic) {
+      const uploadResponse = await cloudinary.uploader.upload(profilePic);
+      updateData.profilePic = uploadResponse.secure_url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log("Error in partial update profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// DELETE - Delete user account
+export const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Delete user from database
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Clear authentication cookie
+    res.cookie("jwt", "", { maxAge: 0 });
+
+    res.status(200).json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.log("Error in deleteAccount controller:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// HEAD - Check if user exists (without returning full user data)
+export const checkUserExists = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (user) {
+      res.status(200).end();
+    } else {
+      res.status(404).end();
+    }
+  } catch (error) {
+    console.log("Error in checkUserExists controller:", error);
+    res.status(500).end();
+  }
+};

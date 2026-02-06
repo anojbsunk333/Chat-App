@@ -5,17 +5,37 @@ import {
   logout,
   signup,
   updateProfile,
+  partialUpdateProfile,
+  deleteAccount,
+  checkUserExists,
 } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+// POST methods - Create resources
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
 
+// GET methods - Retrieve resources
+router.get("/check", protectRoute, checkAuth);
+router.head("/check-exists", checkUserExists);
+
+// PUT method - Full profile update
 router.put("/update-profile", protectRoute, updateProfile);
 
-router.get("/check", protectRoute, checkAuth);
+// PATCH method - Partial profile update
+router.patch("/update-profile", protectRoute, partialUpdateProfile);
+
+// DELETE method - Delete account
+router.delete("/delete-account", protectRoute, deleteAccount);
+
+// OPTIONS method - CORS preflight (usually automatic)
+router.options("/signup", (req, res) => res.status(200).end());
+router.options("/login", (req, res) => res.status(200).end());
+router.options("/logout", (req, res) => res.status(200).end());
+router.options("/update-profile", (req, res) => res.status(200).end());
+router.options("/delete-account", (req, res) => res.status(200).end());
 
 export default router;
