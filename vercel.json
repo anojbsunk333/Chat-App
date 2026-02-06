@@ -2,8 +2,9 @@
   "version": 2,
   "builds": [
     {
-      "src": "Backend/index.js",
-      "use": "@vercel/node"
+      "src": "Backend/src/index.js",
+      "use": "@vercel/node",
+      "config": { "maxLambdaSize": "50mb" }
     },
     {
       "src": "Frontend/package.json",
@@ -16,11 +17,14 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "Backend/index.js"
+      "dest": "Backend/src/index.js"
     },
     {
       "src": "/(.*)",
       "dest": "Frontend/dist/$1"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

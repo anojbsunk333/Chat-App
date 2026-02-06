@@ -17,5 +17,11 @@ router.get("/unread/count", protectRoute, getUnreadCount);
 router.get("/:id", protectRoute, getMessages);
 router.post("/send/:id", protectRoute, sendMessage);
 router.post("/mark-read/:userId", protectRoute, markMessagesAsRead);
+router.post(
+  "/send/:id",
+  protectRoute,
+  express.json({ limit: "1000mb" }), // Apply limit here too
+  sendMessage,
+);
 
 export default router;
