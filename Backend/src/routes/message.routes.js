@@ -33,17 +33,4 @@ router.patch("/status/bulk", protectRoute, updateMessagesStatus);
 router.delete("/:messageId", protectRoute, deleteMessage);
 router.delete("/conversation/:userId", protectRoute, deleteConversation);
 
-// OPTIONS methods - CORS preflight
-router.options("/users", (req, res) => res.status(200).end());
-router.options("/conversations", (req, res) => res.status(200).end());
-router.options("/send/:id", (req, res) => res.status(200).end());
-router.options("/mark-read/:userId", (req, res) => res.status(200).end());
-router.options("/:id", (req, res) => res.status(200).end());
-router.options("/:messageId", (req, res) => res.status(200).end());
-
-// HEAD method - Check if message exists
-router.head("/:messageId", protectRoute, (req, res) => {
-  res.status(200).end();
-});
-
 export default router;

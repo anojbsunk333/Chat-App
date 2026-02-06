@@ -35,11 +35,6 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// Global OPTIONS handler for all routes
-app.options("*", (req, res) => {
-  res.status(200).end();
-});
-
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);

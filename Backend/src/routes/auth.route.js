@@ -31,11 +31,4 @@ router.patch("/update-profile", protectRoute, partialUpdateProfile);
 // DELETE method - Delete account
 router.delete("/delete-account", protectRoute, deleteAccount);
 
-// OPTIONS method - CORS preflight (usually automatic)
-router.options("/signup", (req, res) => res.status(200).end());
-router.options("/login", (req, res) => res.status(200).end());
-router.options("/logout", (req, res) => res.status(200).end());
-router.options("/update-profile", (req, res) => res.status(200).end());
-router.options("/delete-account", (req, res) => res.status(200).end());
-
 export default router;
