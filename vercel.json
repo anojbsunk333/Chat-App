@@ -30,6 +30,5 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "buildCommand": "cd Frontend && npm install && npm run build"
+  }
 }

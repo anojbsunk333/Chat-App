@@ -14,7 +14,7 @@ if (process.env.NODE_ENV !== "production") {
       origin: [
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://chat-app-three-pi-78.vercel.app"
+        "https://chat-app-three-pi-78.vercel.app",
       ],
       credentials: true,
     },
