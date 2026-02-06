@@ -1,5 +1,4 @@
 import Navbar from "./components/Navbar";
-
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -18,13 +17,11 @@ const App = () => {
   const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
 
-  console.log({ onlineUsers });
+  console.log("Online users in App:", onlineUsers);
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
-  console.log({ authUser });
 
   if (isCheckingAuth && !authUser)
     return (
@@ -61,4 +58,5 @@ const App = () => {
     </div>
   );
 };
+
 export default App;

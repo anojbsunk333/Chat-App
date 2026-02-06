@@ -15,10 +15,12 @@ export const useAuthStore = create((set, get) => ({
   onlineUsers: [],
   socket: null,
 
+  // Add this function to manually set online users if needed
+  setOnlineUsers: (userIds) => set({ onlineUsers: userIds }),
+
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
-
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
@@ -49,7 +51,6 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
       toast.success("Logged in successfully");
-
       get().connectSocket();
     } catch (error) {
       toast.error(error.response.data.message);
@@ -61,7 +62,7 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
-      set({ authUser: null });
+      set({ authUser: null, onlineUsers: [] }); // Clear onlineUsers on logout
       toast.success("Logged out successfully");
       get().disconnectSocket();
     } catch (error) {
@@ -87,20 +88,86 @@ export const useAuthStore = create((set, get) => ({
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
 
+    console.log("Connecting socket for user:", authUser._id);
+
     const socket = io(BASE_URL, {
       query: {
         userId: authUser._id,
       },
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
+
     socket.connect();
 
-    set({ socket: socket });
+    // Socket event listeners
+    socket.on("connect", () => {
+      console.log("Socket connected with ID:", socket.id);
+    });
 
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
+    // Update online users list
     socket.on("getOnlineUsers", (userIds) => {
+      console.log("Received online users:", userIds);
       set({ onlineUsers: userIds });
     });
+
+    // Listen for individual user online events
+    socket.on("user-online", (data) => {
+      console.log("User came online:", data.userId);
+      const { onlineUsers } = get();
+      if (!onlineUsers.includes(data.userId)) {
+        set({ onlineUsers: [...onlineUsers, data.userId] });
+      }
+    });
+
+    // Listen for individual user offline events
+    socket.on("user-offline", (data) => {
+      console.log("User went offline:", data.userId);
+      const { onlineUsers } = get();
+      set({
+        onlineUsers: onlineUsers.filter((id) => id !== data.userId),
+      });
+    });
+
+    set({ socket: socket });
   },
+
   disconnectSocket: () => {
-    if (get().socket?.connected) get().socket.disconnect();
+    const { socket } = get();
+    if (socket?.connected) {
+      console.log("Disconnecting socket");
+
+      // Remove all listeners
+      socket.off("getOnlineUsers");
+      socket.off("user-online");
+      socket.off("user-offline");
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("connect_error");
+
+      socket.disconnect();
+      set({ socket: null, onlineUsers: [] });
+    }
+  },
+
+  // Helper function to check if a specific user is online
+  isUserOnline: (userId) => {
+    const { onlineUsers } = get();
+    return onlineUsers.includes(userId);
+  },
+
+  // Get socket instance for other components to use
+  getSocket: () => {
+    return get().socket;
   },
 }));
