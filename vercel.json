@@ -20,11 +20,16 @@
       "dest": "Backend/src/index.js"
     },
     {
+      "src": "/(.*)\\.(?:js|css|jpg|jpeg|png|gif|ico|svg|webp|woff|woff2|ttf|eot)$",
+      "dest": "Frontend/dist/$1.$2"
+    },
+    {
       "src": "/(.*)",
-      "dest": "Frontend/dist/$1"
+      "dest": "Frontend/dist/index.html"
     }
   ],
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "buildCommand": "cd Frontend && npm install && npm run build"
 }

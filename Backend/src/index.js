@@ -77,8 +77,14 @@ if (process.env.NODE_ENV === "production") {
 // Alternative: SIMPLER VERSION - Remove the problematic pattern entirely
 // Instead of app.all("/api/*", ...), let Express handle 404 naturally
 
-server.listen(PORT, () => {
-  console.log(`Server running on PORT: ${PORT}`);
-  console.log(`Mode: ${process.env.NODE_ENV || "development"}`);
-  connectDB();
-});
+// Export app for Vercel serverless (must be default export)
+export default app;
+
+// Start server for local development
+if (process.env.NODE_ENV !== "production") {
+  server.listen(PORT, () => {
+    console.log(`Server running on PORT: ${PORT}`);
+    console.log(`Mode: development`);
+    connectDB();
+  });
+}
