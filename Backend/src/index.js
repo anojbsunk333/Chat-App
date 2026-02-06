@@ -62,7 +62,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(frontendPath));
 
   // Handle SPA routing - all non-API routes go to index.html
-  app.get("*", (req, res) => {
+  app.use((req, res) => {
     // Don't handle API routes here - they're already handled above
     if (req.path.startsWith("/api/")) {
       // This will only be reached if no API route matched
